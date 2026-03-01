@@ -1,0 +1,126 @@
+.app-container {
+  min-height: 100vh;
+  background-color: #F8FAFC;
+}
+
+.sidebar {
+  width: 280px;
+  background: #1E293B;
+  border-right: none;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.main-content {
+  margin-left: 280px;
+  min-height: 100vh;
+  background-color: #F8FAFC;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kanban-column {
+  background: #F8FAFC;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 500px;
+}
+
+.kanban-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid;
+  cursor: move;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.kanban-card.dragging {
+  opacity: 0.5;
+  transform: rotate(3deg);
+}
+
+.login-bg {
+  background-image: url('https://images.unsplash.com/photo-1735094365748-07b16a185749?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-overlay {
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8));
+}
+
+/* React Big Calendar Styling */
+.rbc-calendar {
+  font-family: 'Public Sans', sans-serif;
+}
+
+.rbc-header {
+  padding: 12px 6px;
+  font-weight: 600;
+  color: #334155;
+  background-color: #F8FAFC;
+  border-bottom: 2px solid #E2E8F0;
+}
+
+.rbc-today {
+  background-color: #ECFDF5;
+}
+
+.rbc-event {
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  border: none;
+}
+
+.rbc-toolbar button {
+  padding: 8px 16px;
+  border: 1px solid #E2E8F0;
+  background-color: white;
+  color: #334155;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.rbc-toolbar button:hover {
+  background-color: #F8FAFC;
+  border-color: #059669;
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: #059669;
+  color: white;
+  border-color: #059669;
+}
+
+.rbc-toolbar button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.rbc-month-view, .rbc-time-view {
+  border: 1px solid #E2E8F0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid #E2E8F0;
+}
+
+.rbc-month-row + .rbc-month-row {
+  border-top: 1px solid #E2E8F0;
+}
