@@ -11,8 +11,8 @@ import TimelinePage from '@/pages/TimelinePage';
 import AdminPage from '@/pages/AdminPage';
 import { Toaster } from '@/components/ui/sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-export const API = `${BACKEND_URL}/api`;
+// Pakai /api sebagai path relatif - Vercel akan proxy ke Railway
+export const API = '/api';
 
 export const axiosInstance = axios.create({
   baseURL: API,
