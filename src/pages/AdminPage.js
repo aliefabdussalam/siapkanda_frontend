@@ -20,6 +20,7 @@ const AdminPage = () => {
     type: 'kementerian',
     value: '',
     region: '',
+    kota_kabupaten: '',
     start_date: '',
     end_date: '',
     status: 'pending',
@@ -34,6 +35,8 @@ const AdminPage = () => {
     waktu: '',
     contact_person: '',
     pic: '',
+    // New field for Dapil
+    tujuan_program: '',
   });
   const [uploadingFor, setUploadingFor] = useState(null);
   const [previewAttachment, setPreviewAttachment] = useState(null);
@@ -71,6 +74,7 @@ const AdminPage = () => {
         type: 'kementerian',
         value: '',
         region: '',
+        kota_kabupaten: '',
         start_date: '',
         end_date: '',
         status: 'pending',
@@ -84,6 +88,7 @@ const AdminPage = () => {
         waktu: '',
         contact_person: '',
         pic: '',
+        tujuan_program: '',
       });
       fetchDirectives();
     } catch (error) {
@@ -398,7 +403,7 @@ const AdminPage = () => {
 
                   <div>
                     <Label htmlFor="region" className="text-sm font-medium text-slate-700 mb-2 block">
-                      Daerah
+                      Provinsi
                     </Label>
                     <Input
                       id="region"
@@ -406,7 +411,70 @@ const AdminPage = () => {
                       data-testid="input-region"
                       value={formData.region}
                       onChange={handleInputChange}
-                      placeholder="Contoh: Jakarta"
+                      list="provinsi-list"
+                      placeholder="Ketik untuk mencari provinsi..."
+                      className="h-10"
+                    />
+                    <datalist id="provinsi-list">
+                      {/* Sumatera */}
+                      <option value="Aceh" />
+                      <option value="Sumatera Utara" />
+                      <option value="Sumatera Barat" />
+                      <option value="Riau" />
+                      <option value="Kepulauan Riau" />
+                      <option value="Jambi" />
+                      <option value="Sumatera Selatan" />
+                      <option value="Kepulauan Bangka Belitung" />
+                      <option value="Bengkulu" />
+                      <option value="Lampung" />
+                      {/* Jawa */}
+                      <option value="DKI Jakarta" />
+                      <option value="Jawa Barat" />
+                      <option value="Banten" />
+                      <option value="Jawa Tengah" />
+                      <option value="DI Yogyakarta" />
+                      <option value="Jawa Timur" />
+                      {/* Kalimantan */}
+                      <option value="Kalimantan Barat" />
+                      <option value="Kalimantan Tengah" />
+                      <option value="Kalimantan Selatan" />
+                      <option value="Kalimantan Timur" />
+                      <option value="Kalimantan Utara" />
+                      {/* Sulawesi */}
+                      <option value="Sulawesi Utara" />
+                      <option value="Gorontalo" />
+                      <option value="Sulawesi Tengah" />
+                      <option value="Sulawesi Barat" />
+                      <option value="Sulawesi Selatan" />
+                      <option value="Sulawesi Tenggara" />
+                      {/* Bali & Nusa Tenggara */}
+                      <option value="Bali" />
+                      <option value="Nusa Tenggara Barat" />
+                      <option value="Nusa Tenggara Timur" />
+                      {/* Maluku */}
+                      <option value="Maluku" />
+                      <option value="Maluku Utara" />
+                      {/* Papua */}
+                      <option value="Papua Barat Daya" />
+                      <option value="Papua Barat" />
+                      <option value="Papua Tengah" />
+                      <option value="Papua Pegunungan" />
+                      <option value="Papua Selatan" />
+                      <option value="Papua" />
+                    </datalist>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="kota_kabupaten" className="text-sm font-medium text-slate-700 mb-2 block">
+                      Kota/Kabupaten
+                    </Label>
+                    <Input
+                      id="kota_kabupaten"
+                      name="kota_kabupaten"
+                      data-testid="input-kota-kabupaten"
+                      value={formData.kota_kabupaten}
+                      onChange={handleInputChange}
+                      placeholder="Contoh: Bandung, Kabupaten Bogor"
                       className="h-10"
                     />
                   </div>
@@ -466,6 +534,21 @@ const AdminPage = () => {
                   </div>
 
                   <div>
+                    <Label htmlFor="tujuan_program" className="text-sm font-medium text-slate-700 mb-2 block">
+                      Tujuan Program
+                    </Label>
+                    <Input
+                      id="tujuan_program"
+                      name="tujuan_program"
+                      data-testid="input-tujuan-program"
+                      value={formData.tujuan_program}
+                      onChange={handleInputChange}
+                      placeholder="Masukkan tujuan program"
+                      className="h-10"
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor="value" className="text-sm font-medium text-slate-700 mb-2 block">
                       Nama Dapil *
                     </Label>
@@ -483,7 +566,7 @@ const AdminPage = () => {
 
                   <div>
                     <Label htmlFor="region" className="text-sm font-medium text-slate-700 mb-2 block">
-                      Daerah *
+                      Provinsi *
                     </Label>
                     <Input
                       id="region"
@@ -491,8 +574,71 @@ const AdminPage = () => {
                       data-testid="input-region"
                       value={formData.region}
                       onChange={handleInputChange}
-                      placeholder="Contoh: Bandung"
+                      list="provinsi-list-dapil"
+                      placeholder="Ketik untuk mencari provinsi..."
                       required
+                      className="h-10"
+                    />
+                    <datalist id="provinsi-list-dapil">
+                      {/* Sumatera */}
+                      <option value="Aceh" />
+                      <option value="Sumatera Utara" />
+                      <option value="Sumatera Barat" />
+                      <option value="Riau" />
+                      <option value="Kepulauan Riau" />
+                      <option value="Jambi" />
+                      <option value="Sumatera Selatan" />
+                      <option value="Kepulauan Bangka Belitung" />
+                      <option value="Bengkulu" />
+                      <option value="Lampung" />
+                      {/* Jawa */}
+                      <option value="DKI Jakarta" />
+                      <option value="Jawa Barat" />
+                      <option value="Banten" />
+                      <option value="Jawa Tengah" />
+                      <option value="DI Yogyakarta" />
+                      <option value="Jawa Timur" />
+                      {/* Kalimantan */}
+                      <option value="Kalimantan Barat" />
+                      <option value="Kalimantan Tengah" />
+                      <option value="Kalimantan Selatan" />
+                      <option value="Kalimantan Timur" />
+                      <option value="Kalimantan Utara" />
+                      {/* Sulawesi */}
+                      <option value="Sulawesi Utara" />
+                      <option value="Gorontalo" />
+                      <option value="Sulawesi Tengah" />
+                      <option value="Sulawesi Barat" />
+                      <option value="Sulawesi Selatan" />
+                      <option value="Sulawesi Tenggara" />
+                      {/* Bali & Nusa Tenggara */}
+                      <option value="Bali" />
+                      <option value="Nusa Tenggara Barat" />
+                      <option value="Nusa Tenggara Timur" />
+                      {/* Maluku */}
+                      <option value="Maluku" />
+                      <option value="Maluku Utara" />
+                      {/* Papua */}
+                      <option value="Papua Barat Daya" />
+                      <option value="Papua Barat" />
+                      <option value="Papua Tengah" />
+                      <option value="Papua Pegunungan" />
+                      <option value="Papua Selatan" />
+                      <option value="Papua" />
+                    </datalist>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="kota_kabupaten" className="text-sm font-medium text-slate-700 mb-2 block">
+                      Kota/Kabupaten
+                    </Label>
+                    <Input
+                      id="kota_kabupaten"
+                      name="kota_kabupaten"
+                      data-testid="input-kota-kabupaten"
+                      value={formData.kota_kabupaten}
+                      onChange={handleInputChange}
+                      placeholder="Contoh: Bandung, Kabupaten Bogor"
                       className="h-10"
                     />
                   </div>
@@ -672,6 +818,12 @@ const AdminPage = () => {
                       ) : (
                         /* Display for Dapil */
                         <>
+                          {directive.tujuan_program && (
+                            <div className="mb-3">
+                              <span className="text-xs font-medium text-slate-500">Tujuan Program:</span>
+                              <p className="text-sm text-slate-700 mt-1">{directive.tujuan_program}</p>
+                            </div>
+                          )}
                           <p className="text-sm text-slate-600 mb-3">{directive.description}</p>
                           <div className="text-xs text-slate-500 space-y-1 mb-4">
                             <div className="flex gap-4">
