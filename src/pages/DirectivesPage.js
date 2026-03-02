@@ -57,6 +57,56 @@ const DirectivesPage = () => {
     setFilteredDirectives(filtered);
   };
 
+  const handleExportPDF = async () => {
+    try {
+      const params = { type: viewMode };
+      const response = await axiosInstance.get('/directives/export-pdf', {
+        params,
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `arahan_${viewMode}_${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('PDF berhasil diunduh');
+    } catch (error) {
+      toast.error('Gagal mengunduh PDF');
+      console.error('Export error:', error);
+    }
+  };
+
+  const handleExportSinglePDF = async (directiveId, name) => {
+    try {
+      const response = await axiosInstance.get(`/directives/${directiveId}/export-pdf`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `arahan_${name}_${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('PDF berhasil diunduh');
+    } catch (error) {
+      toast.error('Gagal mengunduh PDF');
+      console.error('Export error:', error);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const statusConfig = {
       in_progress: { label: 'Sedang Berjalan', className: 'bg-blue-100 text-blue-700 border-0' },
@@ -110,30 +160,42 @@ const DirectivesPage = () => {
           <p className="text-slate-500 text-sm mt-1">Kelola dan lihat semua arahan kementerian</p>
         </div>
 
-        {/* Toggle View Mode */}
-        <div className="flex items-center bg-slate-100 rounded-lg p-1" data-testid="view-mode-toggle">
-          <button
-            data-testid="toggle-kementerian"
-            onClick={() => setViewMode('kementerian')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === 'kementerian'
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-600 hover:text-slate-800'
-            }`}
+        <div className="flex items-center gap-3">
+          {/* Export PDF Button */}
+          <Button
+            onClick={handleExportPDF}
+            variant="outline"
+            className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
           >
-            Kementerian
-          </button>
-          <button
-            data-testid="toggle-dapil"
-            onClick={() => setViewMode('dapil')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === 'dapil'
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-600 hover:text-slate-800'
-            }`}
-          >
-            Dapil
-          </button>
+            <Download className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+
+          {/* Toggle View Mode */}
+          <div className="flex items-center bg-slate-100 rounded-lg p-1" data-testid="view-mode-toggle">
+            <button
+              data-testid="toggle-kementerian"
+              onClick={() => setViewMode('kementerian')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                viewMode === 'kementerian'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              Kementerian
+            </button>
+            <button
+              data-testid="toggle-dapil"
+              onClick={() => setViewMode('dapil')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                viewMode === 'dapil'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              Dapil
+            </button>
+          </div>
         </div>
       </div>
 
@@ -260,6 +322,12 @@ const DirectivesPage = () => {
                     /* Display for Dapil */
                     <>
                       <h3 className="text-lg font-semibold text-slate-800 mb-2">{directive.title}</h3>
+                      {directive.tujuan_program && (
+                        <div className="mb-3">
+                          <span className="text-xs font-medium text-slate-500">Tujuan Program:</span>
+                          <p className="text-sm text-slate-700 mt-1">{directive.tujuan_program}</p>
+                        </div>
+                      )}
                       <p className="text-sm text-slate-600 mb-3">{directive.description}</p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         <Badge variant="outline" className="text-xs border-slate-200">
@@ -278,6 +346,21 @@ const DirectivesPage = () => {
                     {getStatusBadge(directive.status)}
                   </div>
                 </div>
+                
+                {/* Download PDF Button */}
+                <Button
+                  onClick={() => handleExportSinglePDF(
+                    directive.id, 
+                    directive.type === 'kementerian' 
+                      ? directive.nomor_surat?.replace(/[/\s]/g, '_') 
+                      : directive.title?.replace(/[/\s]/g, '_')
+                  )}
+                  variant="outline"
+                  size="sm"
+                  className="ml-4 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                >
+                  <Download className="w-4 h-4" />
+                </Button>
               </div>
 
               {directive.attachments && directive.attachments.length > 0 && (

@@ -15,36 +15,64 @@ L.Icon.Default.mergeOptions({
 });
 
 const IndonesiaMap = ({ directives }) => {
-  // Indonesia region coordinates (approximate city centers)
+  // Indonesia province coordinates (center of provinces)
   const regionCoordinates = {
-    'Jakarta': { lat: -6.2088, lng: 106.8456 },
-    'Bandung': { lat: -6.9175, lng: 107.6191 },
-    'Surabaya': { lat: -7.2575, lng: 112.7521 },
-    'Medan': { lat: 3.5952, lng: 98.6722 },
-    'Makassar': { lat: -5.1477, lng: 119.4327 },
-    'Yogyakarta': { lat: -7.7956, lng: 110.3695 },
-    'Semarang': { lat: -6.9666, lng: 110.4196 },
-    'Palembang': { lat: -2.9761, lng: 104.7754 },
-    'Pontianak': { lat: -0.0263, lng: 109.3425 },
-    'Banjarmasin': { lat: -3.3194, lng: 114.5908 },
-    'Denpasar': { lat: -8.6705, lng: 115.2126 },
-    'Manado': { lat: 1.4748, lng: 124.8421 },
-    'Jayapura': { lat: -2.5916, lng: 140.6690 },
-    'Padang': { lat: -0.9471, lng: 100.4172 },
-    'Malang': { lat: -7.9666, lng: 112.6326 },
-    'Balikpapan': { lat: -1.2654, lng: 116.8312 },
-    'Pekanbaru': { lat: 0.5071, lng: 101.4478 },
-    'Samarinda': { lat: -0.4948, lng: 117.1436 },
-    'Batam': { lat: 1.0456, lng: 104.0305 },
-    'Kupang': { lat: -10.1787, lng: 123.6070 },
-    'Ambon': { lat: -3.6954, lng: 128.1814 },
-    'Mataram': { lat: -8.5833, lng: 116.1167 },
+    // Sumatera
+    'Aceh': { lat: 4.6951, lng: 96.7494 },
+    'Sumatera Utara': { lat: 2.1154, lng: 99.5451 },
+    'Sumatera Barat': { lat: -0.7399, lng: 100.8000 },
+    'Riau': { lat: 0.2933, lng: 101.7068 },
+    'Kepulauan Riau': { lat: 3.9457, lng: 108.1429 },
+    'Jambi': { lat: -1.6101, lng: 103.6131 },
+    'Sumatera Selatan': { lat: -3.3194, lng: 103.9144 },
+    'Kepulauan Bangka Belitung': { lat: -2.7411, lng: 106.4406 },
+    'Bengkulu': { lat: -3.5778, lng: 102.3464 },
+    'Lampung': { lat: -4.5586, lng: 105.4068 },
+    // Jawa
+    'DKI Jakarta': { lat: -6.2088, lng: 106.8456 },
+    'Jawa Barat': { lat: -7.0909, lng: 107.6689 },
+    'Banten': { lat: -6.4058, lng: 106.0640 },
+    'Jawa Tengah': { lat: -7.1500, lng: 110.1403 },
+    'DI Yogyakarta': { lat: -7.8754, lng: 110.4262 },
+    'Jawa Timur': { lat: -7.5360, lng: 112.2384 },
+    // Kalimantan
+    'Kalimantan Barat': { lat: 0.0000, lng: 111.5000 },
+    'Kalimantan Tengah': { lat: -1.6814, lng: 113.3824 },
+    'Kalimantan Selatan': { lat: -3.0926, lng: 115.2838 },
+    'Kalimantan Timur': { lat: 0.5387, lng: 116.4194 },
+    'Kalimantan Utara': { lat: 3.0731, lng: 116.0413 },
+    // Sulawesi
+    'Sulawesi Utara': { lat: 0.6247, lng: 123.9750 },
+    'Gorontalo': { lat: 0.6999, lng: 122.4467 },
+    'Sulawesi Tengah': { lat: -1.4300, lng: 121.4456 },
+    'Sulawesi Barat': { lat: -2.8442, lng: 119.2321 },
+    'Sulawesi Selatan': { lat: -3.6688, lng: 120.1941 },
+    'Sulawesi Tenggara': { lat: -4.1449, lng: 122.1746 },
+    // Bali & Nusa Tenggara
+    'Bali': { lat: -8.3405, lng: 115.0920 },
+    'Nusa Tenggara Barat': { lat: -8.6529, lng: 117.3616 },
+    'Nusa Tenggara Timur': { lat: -8.6574, lng: 121.0794 },
+    // Maluku
+    'Maluku': { lat: -3.2385, lng: 130.1453 },
+    'Maluku Utara': { lat: 1.5709, lng: 127.8087 },
+    // Papua
+    'Papua Barat Daya': { lat: -1.3361, lng: 132.1908 },
+    'Papua Barat': { lat: -1.3361, lng: 133.1747 },
+    'Papua Tengah': { lat: -3.9949, lng: 136.3492 },
+    'Papua Pegunungan': { lat: -4.2699, lng: 138.0804 },
+    'Papua Selatan': { lat: -7.2942, lng: 138.7305 },
+    'Papua': { lat: -4.2699, lng: 138.0804 },
   };
-
+  
   const regionData = useMemo(() => {
     const regions = {};
     directives.forEach(directive => {
       const region = directive.region;
+      if (!region) return;
+      
+      // Check if region exists in coordinates
+      const coords = regionCoordinates[region];
+      
       if (!regions[region]) {
         regions[region] = {
           name: region,
@@ -52,12 +80,14 @@ const IndonesiaMap = ({ directives }) => {
           pending: 0,
           in_progress: 0,
           implemented: 0,
-          coordinates: regionCoordinates[region] || null
+          coordinates: coords || null
         };
       }
       regions[region].count++;
       regions[region][directive.status]++;
     });
+    
+    // Filter only regions with valid coordinates
     return Object.values(regions).filter(r => r.coordinates !== null);
   }, [directives]);
 
