@@ -1,0 +1,46 @@
+name: Deploy Frontend ke Contabo VPS
+
+on:
+  push:
+    branches:
+      - main  # Ganti jika branch kamu berbeda
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: yarn install --ignore-engines
+
+      # 4. Build React app
+      - name: Build
+        env:
+          CI: false
+          REACT_APP_BACKEND_URL: http://194.163.175.178
+        run: yarn build
+
+      # 5. Setup SSH key
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      # 6. Upload build ke VPS
+      - name: Deploy ke VPS
+        run: |
+          rsync -avz --delete \
+            build/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/siapkanda/
