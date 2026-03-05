@@ -28,7 +28,7 @@ jobs:
       - name: Build
         env:
           CI: false
-          REACT_APP_BACKEND_URL: http://194.163.175.178
+          REACT_APP_BACKEND_URL: https://vymcenter.com
         run: yarn build
 
       # 5. Setup SSH key
