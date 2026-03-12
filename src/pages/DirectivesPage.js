@@ -11,7 +11,8 @@ import {
   Eye,
   X,
   Paperclip,
-  Image
+  Image,
+  Search
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,6 +24,7 @@ const DirectivesPage = () => {
   const [selectedValue, setSelectedValue] = useState('');
   const [loading, setLoading] = useState(true);
   const [previewAttachment, setPreviewAttachment] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -30,7 +32,7 @@ const DirectivesPage = () => {
 
   useEffect(() => {
     filterDirectives();
-  }, [directives, selectedValue]);
+  }, [directives, selectedValue, searchQuery]);
 
   const fetchData = async () => {
     try {
@@ -53,6 +55,24 @@ const DirectivesPage = () => {
     let filtered = [...directives];
     if (selectedValue) {
       filtered = filtered.filter(d => d.value === selectedValue);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(d => {
+        return (
+          (d.title && d.title.toLowerCase().includes(q)) ||
+          (d.description && d.description.toLowerCase().includes(q)) ||
+          (d.nomor_surat && d.nomor_surat.toLowerCase().includes(q)) ||
+          (d.asal_surat && d.asal_surat.toLowerCase().includes(q)) ||
+          (d.disposisi && d.disposisi.toLowerCase().includes(q)) ||
+          (d.tempat && d.tempat.toLowerCase().includes(q)) ||
+          (d.acara && d.acara.toLowerCase().includes(q)) ||
+          (d.pic && d.pic.toLowerCase().includes(q)) ||
+          (d.region && d.region.toLowerCase().includes(q)) ||
+          (d.value && d.value.toLowerCase().includes(q)) ||
+          (d.tujuan_program && d.tujuan_program.toLowerCase().includes(q))
+        );
+      });
     }
     setFilteredDirectives(filtered);
   };
@@ -199,31 +219,56 @@ const DirectivesPage = () => {
         </div>
       </div>
 
-      {/* Filter Section */}
       <Card className="p-4 bg-white border-0 shadow-sm">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            {viewMode === 'kementerian' ? (
-              <Building2 className="w-5 h-5 text-slate-600" />
-            ) : (
-              <MapPin className="w-5 h-5 text-slate-600" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              data-testid="search-input"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari arahan..."
+              className="w-full h-10 pl-9 pr-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
             )}
-            <span className="text-sm font-medium text-slate-700">
-              {viewMode === 'kementerian' ? 'Kementerian' : 'Daerah Pemilihan'}:
-            </span>
           </div>
-          <select
-            data-testid="filter-select"
-            value={selectedValue}
-            onChange={(e) => setSelectedValue(e.target.value)}
-            className="flex-1 h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-          >
-            <option value="">Semua {viewMode === 'kementerian' ? 'Kementerian' : 'Dapil'}</option>
-            {values.map((val) => (
-              <option key={val} value={val}>{val}</option>
-            ))}
-          </select>
+
+          {/* Filter by value */}
+          <div className="flex items-center space-x-2 sm:w-auto">
+            {viewMode === 'kementerian' ? (
+              <Building2 className="w-5 h-5 text-slate-600 flex-shrink-0" />
+            ) : (
+              <MapPin className="w-5 h-5 text-slate-600 flex-shrink-0" />
+            )}
+            <select
+              data-testid="filter-select"
+              value={selectedValue}
+              onChange={(e) => setSelectedValue(e.target.value)}
+              className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 min-w-[180px]"
+            >
+              <option value="">Semua {viewMode === 'kementerian' ? 'Kementerian' : 'Dapil'}</option>
+              {values.map((val) => (
+                <option key={val} value={val}>{val}</option>
+              ))}
+            </select>
+          </div>
         </div>
+
+        {/* Result count */}
+        {(searchQuery || selectedValue) && (
+          <p className="text-xs text-slate-500 mt-2">
+            Menampilkan {filteredDirectives.length} dari {directives.length} arahan
+          </p>
+        )}
       </Card>
 
       {loading ? (

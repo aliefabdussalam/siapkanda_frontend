@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Upload, FileText, Paperclip, X, Eye, Download } from 'lucide-react';
+import { Plus, Trash2, Upload, FileText, Paperclip, X, Eye, Download, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminPage = () => {
@@ -40,6 +40,8 @@ const AdminPage = () => {
   });
   const [uploadingFor, setUploadingFor] = useState(null);
   const [previewAttachment, setPreviewAttachment] = useState(null);
+  const [editingDirective, setEditingDirective] = useState(null); // directive being edited
+  const [editFormData, setEditFormData] = useState({});
 
   useEffect(() => {
     fetchDirectives();
@@ -113,6 +115,12 @@ const AdminPage = () => {
   const handleFileUpload = async (directiveId, file) => {
     if (!file) return;
 
+    const MAX_SIZE = 25 * 1024 * 1024; // 25 MB
+    if (file.size > MAX_SIZE) {
+      toast.error(`Ukuran file melebihi batas maksimal 25 MB`);
+      return;
+    }
+
     setUploadingFor(directiveId);
     const formDataUpload = new FormData();
     formDataUpload.append('file', file);
@@ -136,6 +144,34 @@ const AdminPage = () => {
     if (e.target.files && e.target.files[0]) {
       handleFileUpload(directiveId, e.target.files[0]);
     }
+  };
+
+  const handleEditClick = (directive) => {
+    setEditingDirective(directive.id);
+    setEditFormData({ ...directive });
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.put(`/directives/${editingDirective}`, editFormData);
+      toast.success('Arahan berhasil diperbarui');
+      setEditingDirective(null);
+      setEditFormData({});
+      fetchDirectives();
+    } catch (error) {
+      toast.error('Gagal memperbarui arahan');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingDirective(null);
+    setEditFormData({});
   };
 
   const openPreview = (attachment) => {
@@ -735,7 +771,140 @@ const AdminPage = () => {
             ) : (
               directives.map((directive) => (
                 <Card key={directive.id} className="p-6 bg-white border-0 shadow-sm" data-testid={`manage-card-${directive.id}`}>
-                  <div className="flex items-start justify-between">
+                  {editingDirective === directive.id ? (
+                    /* ── EDIT FORM ── */
+                    <form onSubmit={handleEditSubmit} className="space-y-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-semibold text-slate-800">Edit Arahan</h3>
+                        <Button type="button" size="sm" variant="ghost" onClick={handleEditCancel} className="h-8 w-8 p-0">
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      {directive.type === 'kementerian' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Tanggal Masuk Surat *</Label>
+                            <input type="date" name="tanggal_masuk_surat" value={editFormData.tanggal_masuk_surat || ''} onChange={handleEditInputChange} required className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Tanggal Surat</Label>
+                            <input type="date" name="tanggal_surat" value={editFormData.tanggal_surat || ''} onChange={handleEditInputChange} className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Nomor Surat *</Label>
+                            <Input name="nomor_surat" value={editFormData.nomor_surat || ''} onChange={handleEditInputChange} required className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Asal Surat *</Label>
+                            <Input name="asal_surat" value={editFormData.asal_surat || ''} onChange={handleEditInputChange} required className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Disposisi *</Label>
+                            <select name="disposisi" value={editFormData.disposisi || ''} onChange={handleEditInputChange} required className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                              <option value="">Pilih Disposisi</option>
+                              <option value="Dirjen PPKTrans">Dirjen PPKTrans</option>
+                              <option value="Dirjen PEMT">Dirjen PEMT</option>
+                              <option value="lainnya">Lainnya</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Tempat</Label>
+                            <Input name="tempat" value={editFormData.tempat || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Acara</Label>
+                            <Input name="acara" value={editFormData.acara || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Waktu</Label>
+                            <Input name="waktu" value={editFormData.waktu || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Contact Person</Label>
+                            <Input name="contact_person" value={editFormData.contact_person || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">PIC</Label>
+                            <Input name="pic" value={editFormData.pic || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Provinsi</Label>
+                            <Input name="region" value={editFormData.region || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Kota/Kabupaten</Label>
+                            <Input name="kota_kabupaten" value={editFormData.kota_kabupaten || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Status *</Label>
+                            <select name="status" value={editFormData.status || 'pending'} onChange={handleEditInputChange} required className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                              <option value="pending">Menunggu</option>
+                              <option value="in_progress">Sedang Berjalan</option>
+                              <option value="implemented">Sudah Dilaksanakan</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Deskripsi</Label>
+                            <Textarea name="description" value={editFormData.description || ''} onChange={handleEditInputChange} rows={3} className="resize-none" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Judul Arahan *</Label>
+                            <Input name="title" value={editFormData.title || ''} onChange={handleEditInputChange} required className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Tujuan Program</Label>
+                            <Input name="tujuan_program" value={editFormData.tujuan_program || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Nama Dapil *</Label>
+                            <Input name="value" value={editFormData.value || ''} onChange={handleEditInputChange} required className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Provinsi *</Label>
+                            <Input name="region" value={editFormData.region || ''} onChange={handleEditInputChange} required className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Kota/Kabupaten</Label>
+                            <Input name="kota_kabupaten" value={editFormData.kota_kabupaten || ''} onChange={handleEditInputChange} className="h-10" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Tanggal Mulai *</Label>
+                            <input type="date" name="start_date" value={editFormData.start_date || ''} onChange={handleEditInputChange} required className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Tanggal Selesai *</Label>
+                            <input type="date" name="end_date" value={editFormData.end_date || ''} onChange={handleEditInputChange} required className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Status *</Label>
+                            <select name="status" value={editFormData.status || 'pending'} onChange={handleEditInputChange} required className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                              <option value="pending">Menunggu</option>
+                              <option value="in_progress">Sedang Berjalan</option>
+                              <option value="implemented">Sudah Dilaksanakan</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Deskripsi *</Label>
+                            <Textarea name="description" value={editFormData.description || ''} onChange={handleEditInputChange} required rows={4} className="resize-none" />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-2">
+                        <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                          Simpan Perubahan
+                        </Button>
+                        <Button type="button" variant="outline" onClick={handleEditCancel}>
+                          Batal
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-slate-800">
@@ -935,16 +1104,27 @@ const AdminPage = () => {
                       </div>
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(directive.id)}
-                      data-testid={`delete-button-${directive.id}`}
-                      className="ml-4"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditClick(directive)}
+                        data-testid={`edit-button-${directive.id}`}
+                        className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(directive.id)}
+                        data-testid={`delete-button-${directive.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    </div>
+                  )}
                 </Card>
               ))
             )}
